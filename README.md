@@ -8,6 +8,7 @@ A simple desktop app that fixes surround sound compatibility issues with video f
 Your movie file has a beautiful 5.1 surround sound track (DTS, TrueHD, etc.), but when you play it on Apple TV or your smart TV, you only hear stereo (2.0 channel) sound - or worse, no sound at all. This happens because these devices don't support certain audio codecs, even though they CAN play surround sound.
 
 **Why Your Device Downgrades to Stereo:**
+
 - Your video: Has 5.1 surround (DTS, DTS-HD, TrueHD, FLAC, etc.)
 - Your Apple TV/Smart TV: Doesn't support these codecs
 - Result: Device falls back to stereo or shows "audio not supported"
@@ -18,6 +19,7 @@ Converts your existing 5.1 audio into AC3 5.1 format, which IS universally suppo
 **⚠️ Important:** This does NOT convert stereo (2.0) to surround (5.1). It preserves your existing surround channels by converting them to a compatible format.
 
 **Perfect for:**
+
 - Movies with DTS or TrueHD that only play in stereo on Apple TV
 - Videos showing "audio not supported" errors
 - Plex libraries with incompatible surround formats
@@ -38,6 +40,7 @@ Converts your existing 5.1 audio into AC3 5.1 format, which IS universally suppo
 ### Mac Users
 
 Download the appropriate DMG for your Mac:
+
 - **Apple Silicon (M1/M2/M3)**: `Audio-Remuxer-*-arm64.dmg`
 - **Intel Mac**: `Audio-Remuxer-*-x64.dmg`
 
@@ -58,6 +61,7 @@ Download `Audio-Remuxer-Setup-*.exe` from [Releases](https://github.com/taporian
 ## What It Actually Does
 
 The app performs a smart remux operation:
+
 1. **Video**: Copies without re-encoding (preserves 100% quality)
 2. **Audio Track 1 (NEW)**: Converts your existing 5.1 surround to AC3 5.1 format at 640k bitrate
    - Takes all 6 channels from your original surround track
@@ -115,5 +119,7 @@ MIT
 ## Contributing
 
 Issues and pull requests welcome! For major changes, please open an issue first to discuss what you'd like to change.
+
+```
 
 ```
