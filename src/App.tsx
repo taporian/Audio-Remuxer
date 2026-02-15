@@ -130,7 +130,7 @@ function App() {
             {file && !isProcessing && (
               <div className="file-actions">
                 <button className="button primary" onClick={processFile}>
-                  Create 5.1 Compatible File
+                  Convert Video
                 </button>
                 <button className="button secondary" onClick={reset}>
                   Clear
@@ -151,7 +151,9 @@ function App() {
               </div>
             )}
 
-            {!isProcessing && !file && <div className="status">{status}</div>}
+            {!isProcessing && status && (
+              <div className={`status ${status.startsWith('Error') ? 'error' : ''}`}>{status}</div>
+            )}
           </div>
         </>
       ) : (

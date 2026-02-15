@@ -13,9 +13,15 @@
     "build:web": "tsc -b && vite build",
     "build:electron": "tsc -p electron",
     "build": "npm run build:web && npm run build:electron",
-    "electron-build": "npm run build && electron-builder"
+    "electron-build": "npm run build && electron-builder",
+    "build:mac": "npm run build && electron-builder --mac --x64 --arm64",
+    "build:mac:intel": "npm run build && electron-builder --mac --x64",
+    "build:mac:arm": "npm run build && electron-builder --mac --arm64",
+    "build:win": "npm run build && electron-builder --win --x64",
+    "build:all": "npm run build && electron-builder --mac --universal --win --x64"
   },
   "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "concurrently": "^9.2.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -44,12 +50,31 @@
     "icon": "build/icon.icns",
     "files": [
       "dist/**/*",
-      "dist-electron/**/*"
+      "dist-electron/**/*",
+      "node_modules/@ffmpeg-installer/**/*"
+    ],
+    "asarUnpack": [
+      "node_modules/@ffmpeg-installer/**/*"
     ],
     "mac": {
       "target": "dmg",
       "category": "public.app-category.video",
       "icon": "build/icon.icns"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
     },
     "publish": null
   }

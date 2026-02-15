@@ -1,27 +1,22 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import path from "path";
 import { spawn } from "child_process";
-import { existsSync } from "fs";
+import ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
 
 const isDev = process.env.NODE_ENV === "development";
 
-// Find ffmpeg in common locations
+// Get ffmpeg path from bundled binary
 function findFFmpeg(): string {
-  if (isDev) return "ffmpeg";
-
-  const possiblePaths = [
-    "/opt/homebrew/bin/ffmpeg",
-    "/usr/local/bin/ffmpeg",
-    "/usr/bin/ffmpeg",
-  ];
-
-  for (const path of possiblePaths) {
-    if (existsSync(path)) {
-      return path;
-    }
+  // The @ffmpeg-installer/ffmpeg package provides the correct binary for each platform
+  let ffmpegPath = ffmpegInstaller.path;
+  
+  // In production, ffmpeg is unpacked from asar to app.asar.unpacked
+  // We need to fix the path if it points to app.asar
+  if (ffmpegPath.includes('app.asar')) {
+    ffmpegPath = ffmpegPath.replace('app.asar', 'app.asar.unpacked');
   }
-
-  return "ffmpeg"; // fallback to PATH
+  
+  return ffmpegPath;
 }
 
 function createWindow() {
@@ -36,9 +31,18 @@ function createWindow() {
 
   if (isDev) {
     win.loadURL("http://localhost:5173");
+    win.webContents.openDevTools();
   } else {
     win.loadFile(path.join(__dirname, "../dist/index.html"));
   }
+
+  // Allow opening dev tools in production with Cmd+Option+I (Mac) or Ctrl+Shift+I (Win)
+  win.webContents.on('before-input-event', (event, input) => {
+    if ((input.meta && input.alt && input.key === 'i') || (input.control && input.shift && input.key === 'I')) {
+      win.webContents.toggleDevTools();
+      event.preventDefault();
+    }
+  });
 }
 
 app.whenReady().then(createWindow);
@@ -96,13 +100,14 @@ ipcMain.handle("process-file", async (event, filePath: string) => {
     console.log("Output file:", output);
     console.log("FFmpeg args:", args);
 
-    const ffmpeg = spawn(ffmpegPath, args);
+    try {
+      const ffmpeg = spawn(ffmpegPath, args);
     let duration = 0;
     let errorOutput = "";
 
     ffmpeg.on("error", (error) => {
       console.error("FFmpeg spawn error:", error);
-      reject(`FFmpeg not found at ${ffmpegPath}. Please install FFmpeg: brew install ffmpeg`);
+      reject(`Failed to start FFmpeg. Error: ${error.message}`);
     });
 
     ffmpeg.stderr.on("data", (data) => {
@@ -148,5 +153,9 @@ ipcMain.handle("process-file", async (event, filePath: string) => {
       console.error("FFmpeg error event:", error);
       reject(error.message);
     });
+    } catch (spawnError: any) {
+      console.error("Failed to spawn FFmpeg:", spawnError);
+      reject(`Failed to start FFmpeg: ${spawnError.message}. Path: ${ffmpegPath}`);
+    }
   });
 });
