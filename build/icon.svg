@@ -1,0 +1,60 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0f0f;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1f2837;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="headphoneGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00e5ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00bfdd;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00e5ff;stop-opacity:0.4" />
+      <stop offset="50%" style="stop-color:#00e5ff;stop-opacity:0.7" />
+      <stop offset="100%" style="stop-color:#00e5ff;stop-opacity:0.4" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Full rounded background -->
+  <rect width="1024" height="1024" rx="220" fill="url(#bgGradient)"/>
+  
+  <!-- Audio waves (background) -->
+  <path d="M 200 400 Q 250 350, 300 400 T 400 400" stroke="url(#waveGradient)" stroke-width="8" fill="none" opacity="0.5"/>
+  <path d="M 624 400 Q 674 350, 724 400 T 824 400" stroke="url(#waveGradient)" stroke-width="8" fill="none" opacity="0.5"/>
+  
+  <path d="M 200 512 Q 250 470, 300 512 T 400 512" stroke="url(#waveGradient)" stroke-width="10" fill="none" opacity="0.6"/>
+  <path d="M 624 512 Q 674 470, 724 512 T 824 512" stroke="url(#waveGradient)" stroke-width="10" fill="none" opacity="0.6"/>
+  
+  <path d="M 200 624 Q 250 590, 300 624 T 400 624" stroke="url(#waveGradient)" stroke-width="8" fill="none" opacity="0.5"/>
+  <path d="M 624 624 Q 674 590, 724 624 T 824 624" stroke="url(#waveGradient)" stroke-width="8" fill="none" opacity="0.5"/>
+  
+  <!-- Headphones -->
+  <!-- Headband -->
+  <path d="M 312 280 Q 512 200, 712 280" stroke="url(#headphoneGradient)" stroke-width="32" fill="none" stroke-linecap="round"/>
+  
+  <!-- Left ear cup -->
+  <circle cx="312" cy="480" r="120" fill="url(#headphoneGradient)"/>
+  <circle cx="312" cy="480" r="85" fill="#0f0f0f"/>
+  <circle cx="312" cy="480" r="60" fill="url(#headphoneGradient)" opacity="0.3"/>
+  
+  <!-- Right ear cup -->
+  <circle cx="712" cy="480" r="120" fill="url(#headphoneGradient)"/>
+  <circle cx="712" cy="480" r="85" fill="#0f0f0f"/>
+  <circle cx="712" cy="480" r="60" fill="url(#headphoneGradient)" opacity="0.3"/>
+  
+  <!-- Connection lines -->
+  <line x1="312" y1="320" x2="312" y2="360" stroke="url(#headphoneGradient)" stroke-width="28" stroke-linecap="round"/>
+  <line x1="712" y1="320" x2="712" y2="360" stroke="url(#headphoneGradient)" stroke-width="28" stroke-linecap="round"/>
+  
+  <!-- Audio symbols inside ear cups -->
+  <path d="M 290 480 L 310 465 L 310 495 Z" fill="#00e5ff" opacity="0.8"/>
+  <path d="M 315 470 L 325 465 L 325 495 L 315 490 Z" fill="#00e5ff" opacity="0.6"/>
+  <path d="M 330 460 L 340 455 L 340 505 L 330 500 Z" fill="#00e5ff" opacity="0.4"/>
+  
+  <path d="M 734 480 L 714 465 L 714 495 Z" fill="#00e5ff" opacity="0.8"/>
+  <path d="M 709 470 L 699 465 L 699 495 L 709 490 Z" fill="#00e5ff" opacity="0.6"/>
+  <path d="M 694 460 L 684 455 L 684 505 L 694 500 Z" fill="#00e5ff" opacity="0.4"/>
+  
+  <!-- Accent glow -->
+  <ellipse cx="512" cy="512" rx="380" ry="300" fill="url(#headphoneGradient)" opacity="0.1"/>
+</svg>
