@@ -46,9 +46,30 @@ Download the appropriate DMG for your Mac:
 
 Get them from [Releases](https://github.com/taporian/Audio-Remuxer/releases), open the DMG, and drag to Applications.
 
+**⚠️ First Time Opening (Security Warning):**
+
+Since this app is not code-signed with an Apple Developer certificate, macOS will show a security warning. To open the app:
+
+1. Try to open the app normally (it will show "cannot be opened" warning)
+2. Go to **System Settings** → **Privacy & Security**
+3. Scroll down to the **Security** section
+4. Click **"Open Anyway"** next to the message about Audio Remuxer
+5. Click **Open** in the confirmation dialog
+
+You only need to do this once. After that, the app will open normally.
+
 ### Windows Users
 
 Download `Audio-Remuxer-Setup-*.exe` from [Releases](https://github.com/taporian/Audio-Remuxer/releases) and run the installer.
+
+**⚠️ First Time Opening (Security Warning):**
+
+Windows SmartScreen may show a warning since this app is not code-signed. To install:
+
+1. Click **"More info"**
+2. Click **"Run anyway"**
+
+You only need to do this once during installation.
 
 ## How to Use
 
