@@ -1,7 +1,7 @@
 {
   "name": "audio-remuxer",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Audio remuxer for converting video files to 5.1 compatible format",
   "author": "Your Name",
   "type": "module",
