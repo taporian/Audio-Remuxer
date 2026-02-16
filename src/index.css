@@ -76,12 +76,19 @@ input[type="file"] {
   display: none;
 }
 
-.actions-area {
-  min-height: 170px;
+.warning-container {
+  height: 100px;
+  margin-top: 20px;
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  margin-top: 30px;
+}
+
+.actions-area {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .file-actions {
@@ -205,4 +212,39 @@ input[type="file"] {
   padding: 12px 20px;
   border-radius: 8px;
   border: 1px solid rgba(255, 68, 68, 0.3);
+}
+
+.status-container {
+  height: 50px;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-below {
+  text-align: center;
+  opacity: 0.8;
+  font-size: 15px;
+}
+
+.status-below.error {
+  color: #ff4444;
+  opacity: 1;
+  font-weight: 600;
+  background: rgba(255, 68, 68, 0.1);
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 68, 68, 0.3);
+}
+
+.stereo-warning {
+  padding: 16px 20px;
+  background: rgba(255, 165, 0, 0.15);
+  border: 2px solid rgba(255, 165, 0, 0.5);
+  border-radius: 12px;
+  color: #ffb84d;
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: center;
 }

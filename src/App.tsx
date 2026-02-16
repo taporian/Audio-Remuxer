@@ -4,6 +4,9 @@ declare global {
   interface Window {
     api: {
       processFile: (filePath: string) => Promise<string>;
+      checkAudio: (
+        filePath: string,
+      ) => Promise<{ channels: number; error?: string }>;
       getFilePath: (file: File) => string;
       onProgress: (callback: (progress: number) => void) => void;
     };
@@ -18,9 +21,10 @@ function App() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [outputPath, setOutputPath] = useState<string>("");
+  const [showStereoWarning, setShowStereoWarning] = useState(false);
+  const [isCheckingAudio, setIsCheckingAudio] = useState(false);
 
   useEffect(() => {
-    console.log("API:", window.api);
     window.api.onProgress((prog) => {
       setProgress(prog);
     });
@@ -44,7 +48,36 @@ function App() {
 
       setFile(filePath);
       setFileName(file.name);
-      setStatus("Ready to process");
+      setIsCheckingAudio(true);
+
+      // Check audio channels
+      try {
+        const audioInfo = await window.api.checkAudio(filePath);
+
+        if (audioInfo.channels === 2) {
+          setShowStereoWarning(true);
+          setStatus("Warning: This file only has stereo (2.0) audio");
+        } else if (audioInfo.channels >= 6) {
+          setShowStereoWarning(false);
+          setStatus(
+            `Ready to convert ${audioInfo.channels}-channel surround audio`,
+          );
+        } else if (audioInfo.channels > 0) {
+          setShowStereoWarning(false);
+          setStatus(
+            `Ready to process (${audioInfo.channels} channels detected)`,
+          );
+        } else {
+          setShowStereoWarning(false);
+          setStatus("Ready to process");
+        }
+      } catch (err) {
+        console.error("Failed to check audio:", err);
+        setShowStereoWarning(false);
+        setStatus("Ready to process");
+      } finally {
+        setIsCheckingAudio(false);
+      }
     } catch (err) {
       setStatus("Error getting file path");
       console.error(err);
@@ -104,6 +137,8 @@ function App() {
     setIsProcessing(false);
     setIsComplete(false);
     setOutputPath("");
+    setShowStereoWarning(false);
+    setIsCheckingAudio(false);
   };
 
   return (
@@ -126,14 +161,27 @@ function App() {
             </div>
           </div>
 
+          {/* Always render containers to prevent layout shift */}
+          <div className="warning-container">
+            {showStereoWarning && (
+              <div className="stereo-warning">
+                ⚠️ This file only has stereo (2.0) audio. This tool is designed
+                for files with 5.1+ surround sound that need AC3 conversion.
+                Please select a different file with surround audio.
+              </div>
+            )}
+          </div>
+
           <div className="actions-area">
-            {file && !isProcessing && (
+            {file && !isProcessing && !isCheckingAudio && (
               <div className="file-actions">
-                <button className="button primary" onClick={processFile}>
-                  Convert Audio
-                </button>
+                {!showStereoWarning && (
+                  <button className="button primary" onClick={processFile}>
+                    Convert Audio
+                  </button>
+                )}
                 <button className="button secondary" onClick={reset}>
-                  Clear
+                  {showStereoWarning ? "Select Different File" : "Clear"}
                 </button>
               </div>
             )}
@@ -150,10 +198,12 @@ function App() {
                 <p className="status">{status}</p>
               </div>
             )}
+          </div>
 
-            {!isProcessing && status && (
+          <div className="status-container">
+            {!isProcessing && file && status && (
               <div
-                className={`status ${status.startsWith("Error") ? "error" : ""}`}
+                className={`status-below ${status.startsWith("Error") ? "error" : ""}`}
               >
                 {status}
               </div>

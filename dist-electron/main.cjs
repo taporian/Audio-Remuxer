@@ -14,10 +14,64 @@ function findFFmpeg() {
     let ffmpegPath = ffmpeg_1.default.path;
     // In production, ffmpeg is unpacked from asar to app.asar.unpacked
     // We need to fix the path if it points to app.asar
-    if (ffmpegPath.includes('app.asar')) {
-        ffmpegPath = ffmpegPath.replace('app.asar', 'app.asar.unpacked');
+    if (ffmpegPath.includes("app.asar")) {
+        ffmpegPath = ffmpegPath.replace("app.asar", "app.asar.unpacked");
     }
     return ffmpegPath;
+}
+// Check audio channel count
+async function getAudioChannels(filePath) {
+    const ffmpegPath = findFFmpeg();
+    return new Promise((resolve, reject) => {
+        // Use ffmpeg (not ffprobe) with -i to get stream info
+        const ffmpeg = (0, child_process_1.spawn)(ffmpegPath, [
+            "-i",
+            filePath,
+            "-hide_banner"
+        ]);
+        let output = "";
+        ffmpeg.stderr.on("data", (data) => {
+            output += data.toString();
+        });
+        ffmpeg.on("close", () => {
+            // Look for audio stream info in stderr
+            // Example: "Stream #0:1(und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 317 kb/s"
+            const channelMatch = output.match(/Audio:.*?(\d+)\s+channels?|Audio:.*?\b(mono|stereo|5\.1|7\.1|quad)/i);
+            if (channelMatch) {
+                // Check for named channel layouts
+                const layout = channelMatch[2]?.toLowerCase();
+                if (layout === 'mono') {
+                    resolve(1);
+                }
+                else if (layout === 'stereo') {
+                    resolve(2);
+                }
+                else if (layout === 'quad') {
+                    resolve(4);
+                }
+                else if (layout === '5.1') {
+                    resolve(6);
+                }
+                else if (layout === '7.1') {
+                    resolve(8);
+                }
+                else if (channelMatch[1]) {
+                    resolve(parseInt(channelMatch[1]));
+                }
+                else {
+                    resolve(0);
+                }
+            }
+            else {
+                console.log("Could not detect channels from output:", output);
+                resolve(0);
+            }
+        });
+        ffmpeg.on("error", (err) => {
+            console.error("FFmpeg error:", err);
+            reject("Failed to analyze audio");
+        });
+    });
 }
 function createWindow() {
     const win = new electron_1.BrowserWindow({
@@ -36,22 +90,33 @@ function createWindow() {
         win.loadFile(path_1.default.join(__dirname, "../dist/index.html"));
     }
     // Allow opening dev tools in production with Cmd+Option+I (Mac) or Ctrl+Shift+I (Win)
-    win.webContents.on('before-input-event', (event, input) => {
-        if ((input.meta && input.alt && input.key === 'i') || (input.control && input.shift && input.key === 'I')) {
+    win.webContents.on("before-input-event", (event, input) => {
+        if ((input.meta && input.alt && input.key === "i") ||
+            (input.control && input.shift && input.key === "I")) {
             win.webContents.toggleDevTools();
             event.preventDefault();
         }
     });
 }
 electron_1.app.whenReady().then(createWindow);
+// Check audio information
+electron_1.ipcMain.handle("check-audio", async (event, filePath) => {
+    try {
+        const channels = await getAudioChannels(filePath);
+        return { channels };
+    }
+    catch (error) {
+        console.error("Failed to check audio:", error);
+        return { channels: 0, error: error.message };
+    }
+});
 electron_1.ipcMain.handle("process-file", async (event, filePath) => {
     const output = filePath.replace(/\.(mkv|mp4|avi)$/i, "_FIXED.mkv");
     const ffmpegPath = findFFmpeg();
-    // Best quality strategy: 
-    // - Keep original audio as backup
-    // - Add AC3 5.1 at 640k (industry standard, max quality for AC3)
-    // - If source is already 5.1, convert to AC3 for compatibility
-    // - If source is stereo, properly copy it (don't fake 5.1)
+    // Strategy: Convert existing surround to AC3, preserve stereo as-is
+    // - If source has 5.1+ channels: convert to AC3 5.1
+    // - If source is stereo: keep it as stereo (don't fake surround)
+    // - Always keep original audio as backup
     const args = [
         "-i",
         filePath,
@@ -62,15 +127,13 @@ electron_1.ipcMain.handle("process-file", async (event, filePath) => {
         "0:v",
         "-c:v",
         "copy",
-        // Map first audio track and convert to AC3 5.1 at maximum quality
+        // Map first audio track and convert to AC3 (preserving channel count)
         "-map",
         "0:a:0",
         "-c:a:0",
         "ac3",
         "-b:a:0",
         "640k", // Maximum AC3 bitrate for best quality
-        "-ac:a:0",
-        "6", // 5.1 channels
         "-disposition:a:0",
         "default",
         // Keep original audio as track 2 (backup, lossless if possible)
@@ -80,11 +143,14 @@ electron_1.ipcMain.handle("process-file", async (event, filePath) => {
         "copy",
         "-disposition:a:1",
         "0",
-        // Copy subtitles if any
+        // Copy subtitles if any (only common formats compatible with MKV)
         "-map",
         "0:s?",
         "-c:s",
         "copy",
+        // Strict mode to avoid issues
+        "-strict",
+        "-2",
         "-y",
         output,
     ];
