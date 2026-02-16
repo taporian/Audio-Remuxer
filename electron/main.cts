@@ -22,17 +22,13 @@ function findFFmpeg(): string {
 // Check audio channel count
 async function getAudioChannels(filePath: string): Promise<number> {
   const ffmpegPath = findFFmpeg();
-  
+
   return new Promise((resolve, reject) => {
     // Use ffmpeg (not ffprobe) with -i to get stream info
-    const ffmpeg = spawn(ffmpegPath, [
-      "-i",
-      filePath,
-      "-hide_banner"
-    ]);
+    const ffmpeg = spawn(ffmpegPath, ["-i", filePath, "-hide_banner"]);
 
     let output = "";
-    
+
     ffmpeg.stderr.on("data", (data) => {
       output += data.toString();
     });
@@ -40,20 +36,22 @@ async function getAudioChannels(filePath: string): Promise<number> {
     ffmpeg.on("close", () => {
       // Look for audio stream info in stderr
       // Example: "Stream #0:1(und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 317 kb/s"
-      const channelMatch = output.match(/Audio:.*?(\d+)\s+channels?|Audio:.*?\b(mono|stereo|5\.1|7\.1|quad)/i);
-      
+      const channelMatch = output.match(
+        /Audio:.*?(\d+)\s+channels?|Audio:.*?\b(mono|stereo|5\.1|7\.1|quad)/i,
+      );
+
       if (channelMatch) {
         // Check for named channel layouts
         const layout = channelMatch[2]?.toLowerCase();
-        if (layout === 'mono') {
+        if (layout === "mono") {
           resolve(1);
-        } else if (layout === 'stereo') {
+        } else if (layout === "stereo") {
           resolve(2);
-        } else if (layout === 'quad') {
+        } else if (layout === "quad") {
           resolve(4);
-        } else if (layout === '5.1') {
+        } else if (layout === "5.1") {
           resolve(6);
-        } else if (layout === '7.1') {
+        } else if (layout === "7.1") {
           resolve(8);
         } else if (channelMatch[1]) {
           resolve(parseInt(channelMatch[1]));
